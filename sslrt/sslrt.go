@@ -50,15 +50,12 @@ func (t openSSLTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	// TODO(runcom):
 	// maybe need a cert pool varying from system to system?
-	if err := ctx.LoadVerifyLocations("/etc/ssl/certs/ca-bundle.crt", ""); err != nil {
+	if err := ctx.LoadVerifyLocations("", "/etc/ssl/certs/"); err != nil {
 		return nil, err
 	}
 
 	targetAddr := canonicalAddr(req.URL)
-	// TODO(runcom):
-	// do not skip cert validation
-	// currently panic badly, see split_stack_overflow.txt in root
-	conn, err := openssl.Dial("tcp", targetAddr, ctx, 1)
+	conn, err := openssl.Dial("tcp", targetAddr, ctx, 0)
 	if err != nil {
 		return nil, err
 	}

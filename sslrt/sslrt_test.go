@@ -8,12 +8,10 @@ import (
 )
 
 func TestHTTPS(t *testing.T) {
-	transport := &OpenSSLTransport{}
+	transport := &openSSLTransport{}
 	req, _ := http.NewRequest("GET", "https://google.com", nil)
 	res, _ := transport.RoundTrip(req)
 	body, _ := ioutil.ReadAll(res.Body)
-
 	res.Body.Close()
-
-	fmt.Println(string(body))
+	fmt.Printf("%s", string(body))
 }
