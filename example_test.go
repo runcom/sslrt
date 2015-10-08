@@ -1,4 +1,4 @@
-package main
+package sslrt_test
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ func init() {
 	http.DefaultTransport = sslrt.NewOpenSSLTransport(nil)
 }
 
-func main() {
+func ExampleOpenSSLTransport() {
 	res, err := http.Get("https://google.com")
 	if err != nil {
 		panic(err)

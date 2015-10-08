@@ -13,18 +13,13 @@ import (
 	"github.com/runcom/openssl"
 )
 
-func NewOpenSSLTransport(defaultTransport http.RoundTripper) http.RoundTripper {
-	if defaultTransport == nil {
-		defaultTransport = http.DefaultTransport
-	}
-	return &openSSLTransport{defaultTransport: defaultTransport}
-}
-
-type openSSLTransport struct {
+// OpenSSLTransport
+type OpenSSLTransport struct {
 	defaultTransport http.RoundTripper
 }
 
-func (t openSSLTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+// RoundTrip
+func (t OpenSSLTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if req.URL == nil {
 		req.Body.Close()
 		return nil, errors.New("http: nil Request.URL")
@@ -35,6 +30,9 @@ func (t openSSLTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 	// short circuit to most use-cases
 	if req.URL.Scheme != "https" {
+		if t.defaultTransport == nil {
+			return http.DefaultTransport.RoundTrip(req)
+		}
 		return t.defaultTransport.RoundTrip(req)
 	}
 	if req.URL.Host == "" {
@@ -117,6 +115,14 @@ func (t openSSLTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return r.res, nil
 }
 
+// NewOpenSSLTransport
+func NewOpenSSLTransport(defaultTransport http.RoundTripper) http.RoundTripper {
+	if defaultTransport == nil {
+		defaultTransport = http.DefaultTransport
+	}
+	return &OpenSSLTransport{defaultTransport: defaultTransport}
+}
+
 func canonicalAddr(url *url.URL) string {
 	addr := url.Host
 
@@ -136,9 +142,9 @@ type connCloser struct {
 	conn net.Conn
 }
 
-func (this *connCloser) Close() error {
-	this.conn.Close()
-	return this.ReadCloser.Close()
+func (cc *connCloser) Close() error {
+	cc.conn.Close()
+	return cc.ReadCloser.Close()
 }
 
 type readerAndCloser struct {
